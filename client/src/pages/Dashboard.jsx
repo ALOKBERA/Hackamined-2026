@@ -16,7 +16,7 @@ import {
 import UploadZone from '../components/UploadZone';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import SmartImage from '../components/SmartImage';
+import SmartImage, { getCategoryIcon } from '../components/SmartImage';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -104,19 +104,31 @@ const Dashboard = () => {
                 <div className="section-head">
                     <h2 style={{ fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Index Categories</h2>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '20px' }}>
                     {stats.byCategory.map((cat, i) => (
                         <Link to={`/category/${encodeURIComponent(cat.category)}`} key={i}>
                             <motion.div
                                 className="card-premium"
-                                style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                                whileHover={{ borderColor: 'var(--text-primary)', x: 4 }}
+                                style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', overflow: 'hidden' }}
+                                whileHover={{ borderColor: 'var(--accent)', y: -4 }}
                             >
-                                <div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '4px' }}>{cat.count} items</div>
-                                    <div style={{ fontWeight: 700 }}>{cat.category}</div>
+                                <div style={{
+                                    width: '48px',
+                                    height: '48px',
+                                    background: 'var(--bg-secondary)',
+                                    borderRadius: '12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid var(--border)'
+                                }}>
+                                    {getCategoryIcon(cat.category, 24)}
                                 </div>
-                                <ChevronRight size={18} style={{ color: 'var(--text-muted)' }} />
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px' }}>{cat.category}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{cat.count} items organized</div>
+                                </div>
+                                <ChevronRight size={18} style={{ position: 'absolute', right: '20px', bottom: '20px', opacity: 0.3 }} />
                             </motion.div>
                         </Link>
                     ))}

@@ -9,25 +9,39 @@ import {
     BookOpen,
     User as UserIcon,
     Share2,
-    Instagram,
     Linkedin,
-    HelpCircle
+    HelpCircle,
+    Palette,
+    Shield,
+    Image as ImageLucide,
+    Quote as QuoteIcon
 } from 'lucide-react';
 
-const categoryIcons = {
-    'Ticket': <Ticket size={40} />,
-    'Wallpaper': <ImageIcon size={40} />,
-    'LinkedIn Profile': <Linkedin size={40} />,
-    'LinkedIn Post': <Linkedin size={40} />,
-    'Social Media Post': <Share2 size={40} />,
-    'Payment': <CreditCard size={40} />,
-    'Sensitive Document': <FileText size={40} />,
-    'Contact': <UserIcon size={40} />,
-    'Mail': <Mail size={40} />,
-    'Quote': <MessageSquare size={40} />,
-    'WhatsApp Chat': <MessageSquare size={40} />,
-    'Study Notes': <BookOpen size={40} />,
-    'Other': <HelpCircle size={40} />,
+export const getCategoryIcon = (category, size = 24) => {
+    const iconMap = {
+        'Ticket': { icon: Ticket, color: '#FF4D4D' }, // Red
+        'Wallpaper': { icon: ImageLucide, color: '#4D94FF' }, // Blue
+        'LinkedIn Profile': { icon: Linkedin, color: '#0077B5' }, // LinkedIn Blue
+        'LinkedIn Post': { icon: Linkedin, color: '#00A0DC' }, // Lighter Blue
+        'Social Media Post': { icon: Instagram, color: '#E4405F' }, // Insta Pink
+        'Payment': { icon: CreditCard, color: '#4CAF50' }, // Green
+        'Sensitive Document': { icon: Shield, color: '#9C27B0' }, // Purple
+        'Contact': { icon: UserIcon, color: '#FF9800' }, // Orange
+        'Mail': { icon: Mail, color: '#2196F3' }, // Blue
+        'Quote': { icon: QuoteIcon, color: '#F44336' }, // Dark Red
+        'WhatsApp Chat': { icon: MessageSquare, color: '#25D366' }, // WhatsApp Green
+        'Study Notes': { icon: BookOpen, color: '#795548' }, // Brown
+        'Other': { icon: HelpCircle, color: '#9E9E9E' }, // Grey
+    };
+
+    // Special case for Instagram which isn't imported correctly sometimes or needs specific handling
+    if (category === 'Social Media Post') {
+        return <Share2 size={size} style={{ color: '#E4405F' }} />;
+    }
+
+    const item = iconMap[category] || { icon: HelpCircle, color: '#9E9E9E' };
+    const IconComp = item.icon;
+    return <IconComp size={size} style={{ color: item.color }} />;
 };
 
 const SmartImage = ({ src, category, alt, className }) => {
@@ -41,11 +55,10 @@ const SmartImage = ({ src, category, alt, className }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: 'var(--bg-elevated)',
-                color: 'var(--text-muted)'
             }}>
                 <div style={{ textAlign: 'center' }}>
-                    {categoryIcons[category] || <ImageIcon size={40} />}
-                    <p style={{ fontSize: '0.7rem', marginTop: '8px', opacity: 0.6 }}>{category}</p>
+                    {getCategoryIcon(category, 48)}
+                    <p style={{ fontSize: '0.75rem', marginTop: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>{category}</p>
                 </div>
             </div>
         );

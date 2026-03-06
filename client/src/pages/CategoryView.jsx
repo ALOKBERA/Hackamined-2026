@@ -11,7 +11,7 @@ import {
     FolderOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import SmartImage from '../components/SmartImage';
+import SmartImage, { getCategoryIcon } from '../components/SmartImage';
 
 const CategoryView = () => {
     const { categoryName } = useParams();
@@ -69,7 +69,7 @@ const CategoryView = () => {
                         borderRadius: 'var(--radius-md)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                        <FolderOpen size={32} style={{ color: 'var(--accent)' }} />
+                        {getCategoryIcon(categoryName, 32)}
                     </div>
                     <div>
                         <h1 style={{ fontSize: '2.5rem' }}>{categoryName}</h1>
