@@ -16,7 +16,8 @@ import {
 import UploadZone from '../components/UploadZone';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import SmartImage, { getCategoryIcon } from '../components/SmartImage';
+import SmartImage from '../components/SmartImage';
+import { getCategoryIcon } from '../utils/categoryIcons';
 
 const Dashboard = () => {
     const { user } = useAuth();

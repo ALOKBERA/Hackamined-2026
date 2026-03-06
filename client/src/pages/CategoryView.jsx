@@ -11,7 +11,8 @@ import {
     FolderOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import SmartImage, { getCategoryIcon } from '../components/SmartImage';
+import SmartImage from '../components/SmartImage';
+import { getCategoryIcon } from '../utils/categoryIcons';
 
 const CategoryView = () => {
     const { categoryName } = useParams();
