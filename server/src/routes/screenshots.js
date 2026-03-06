@@ -190,18 +190,33 @@ router.get('/category/:cat', requireAuth, async (req, res) => {
 // ─── GET /api/screenshots/stats ──────────────────────────────────────────────
 router.get('/stats', requireAuth, async (req, res) => {
     try {
-        const stats = await Screenshot.aggregate([
+        const ALL_CATEGORIES = [
+            'Ticket', 'Wallpaper', 'LinkedIn Profile', 'LinkedIn Post',
+            'Social Media Post', 'Payment', 'Sensitive Document', 'Contact',
+            'Mail', 'Quote', 'WhatsApp Chat', 'Study Notes', 'Other'
+        ];
+
+        const aggregatedStats = await Screenshot.aggregate([
             { $match: { userId: req.user._id } },
             { $group: { _id: '$category', count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
         ]);
 
-        const total = stats.reduce((sum, s) => sum + s.count, 0);
+        const statsMap = aggregatedStats.reduce((acc, curr) => {
+            acc[curr._id] = curr.count;
+            return acc;
+        }, {});
+
+        const byCategory = ALL_CATEGORIES.map(category => ({
+            category,
+            count: statsMap[category] || 0
+        }));
+
+        const total = aggregatedStats.reduce((sum, s) => sum + s.count, 0);
 
         res.json({
             success: true,
             total,
-            byCategory: stats.map((s) => ({ category: s._id, count: s.count })),
+            byCategory,
         });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
