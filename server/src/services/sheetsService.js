@@ -83,7 +83,7 @@ async function ensureUserSheet(user) {
         }
 
         // Ensure headers are present
-        const range = `${tab.title}!A1:K1`;
+        const range = `'${tab.title}'!A1:K1`;
         const headerRes = await sheets.spreadsheets.values.get({ spreadsheetId, range });
         if (!headerRes.data.values || headerRes.data.values.length === 0) {
             await sheets.spreadsheets.values.update({
@@ -94,7 +94,8 @@ async function ensureUserSheet(user) {
             });
 
             // Style the header row
-            const sheet = (await sheets.spreadsheets.get({ spreadsheetId })).data.sheets.find(s => s.properties.title === tab.title);
+            const ssData = (await sheets.spreadsheets.get({ spreadsheetId })).data;
+            const sheet = ssData.sheets.find(s => s.properties.title === tab.title);
             await sheets.spreadsheets.batchUpdate({
                 spreadsheetId,
                 requestBody: {
@@ -127,7 +128,7 @@ async function appendToSheet(user, tabName, values) {
 
     const appendRes = await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: `${tabName}!A:Z`,
+        range: `'${tabName}'!A:Z`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [values] },
     });

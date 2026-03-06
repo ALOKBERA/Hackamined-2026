@@ -19,6 +19,12 @@ import { Link } from 'react-router-dom';
 import SmartImage from '../components/SmartImage';
 import { getCategoryIcon } from '../utils/categoryIcons';
 
+const ALL_CATEGORIES = [
+    'Ticket', 'Wallpaper', 'LinkedIn Profile', 'LinkedIn Post', 'Social Media Post',
+    'Payment', 'Sensitive Document', 'Contact', 'Mail', 'Quote',
+    'WhatsApp Chat', 'Study Notes', 'Other'
+];
+
 const Dashboard = () => {
     const { user } = useAuth();
     const [stats, setStats] = useState({ total: 0, byCategory: [] });
@@ -26,7 +32,17 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showUploader, setShowUploader] = useState(false);
 
+    // Merge backend stats with ALL_CATEGORIES to ensure all are shown
+    const displayCategories = ALL_CATEGORIES.map(categoryName => {
+        const stat = stats.byCategory.find(c => c.category === categoryName);
+        return {
+            category: categoryName,
+            count: stat ? stat.count : 0
+        };
+    }).sort((a, b) => b.count - a.count); // Show most populated first
+
     const fetchData = async () => {
+        // ... (rest of fetchData)
         try {
             const [statsRes, recentRes] = await Promise.all([
                 axios.get('/api/screenshots/stats'),
@@ -93,7 +109,7 @@ const Dashboard = () => {
                     <div className="stat-box-label">Total Volume</div>
                     <div className="stat-box-val">{stats.total}</div>
                 </div>
-                {stats.byCategory.slice(0, 4).map((cat, i) => (
+                {displayCategories.slice(0, 4).map((cat, i) => (
                     <div key={i} className="stat-box">
                         <div className="stat-box-label">{cat.category}</div>
                         <div className="stat-box-val">{cat.count}</div>
@@ -106,7 +122,7 @@ const Dashboard = () => {
                     <h2 style={{ fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Index Categories</h2>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '20px' }}>
-                    {stats.byCategory.map((cat, i) => (
+                    {displayCategories.map((cat, i) => (
                         <Link to={`/category/${encodeURIComponent(cat.category)}`} key={i}>
                             <motion.div
                                 className="card-premium"
