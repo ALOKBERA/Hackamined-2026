@@ -80,9 +80,10 @@ router.post(
 
             // ── Step 4: Log to Google Sheets ──────────────────────────────────────
             let sheetsRowNumber = null;
+            let sheetsLink = null;
             try {
                 console.log('📊 Logging to Sheets...');
-                sheetsRowNumber = await appendRow(user, {
+                const sheetResult = await appendRow(user, {
                     timestamp: new Date().toISOString(),
                     category: aiResult.category,
                     summary: aiResult.summary,
@@ -92,7 +93,12 @@ router.post(
                     calendarEventLink: calendarEventLink || '',
                     confidence: aiResult.confidence,
                 });
-                console.log(`✅ Sheet row: ${sheetsRowNumber}`);
+
+                if (sheetResult) {
+                    sheetsRowNumber = sheetResult.rowNumber;
+                    sheetsLink = `https://docs.google.com/spreadsheets/d/${sheetResult.spreadsheetId}`;
+                    console.log(`✅ Sheet row: ${sheetsRowNumber}`);
+                }
 
                 // ── Step 4.1: Specialized Category Logging ───────────────────────────
                 const { category, extractedData } = aiResult;
@@ -141,6 +147,7 @@ router.post(
                 calendarEventId,
                 calendarEventLink,
                 sheetsRowNumber,
+                sheetsLink,
             });
 
             // Increment upload count

@@ -51,6 +51,7 @@ const screenshotSchema = new mongoose.Schema(
 
         // Google Sheets row
         sheetsRowNumber: { type: Number, default: null },
+        sheetsLink: { type: String, default: null },
     },
     { timestamps: true }
 );

@@ -8,7 +8,8 @@ import {
     ExternalLink,
     Calendar as CalIcon,
     ChevronLeft,
-    FolderOpen
+    FolderOpen,
+    FileText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SmartImage from '../components/SmartImage';
@@ -116,6 +117,11 @@ const CategoryView = () => {
                                         <a href={item.driveViewLink} target="_blank" rel="noreferrer" className="btn-icon">
                                             <ExternalLink size={16} />
                                         </a>
+                                        {item.sheetsLink && (
+                                            <a href={item.sheetsLink} target="_blank" rel="noreferrer" className="btn-icon" title="View entry in Sheet">
+                                                <FileText size={16} />
+                                            </a>
+                                        )}
                                         {item.calendarEventLink && (
                                             <a href={item.calendarEventLink} target="_blank" rel="noreferrer" className="btn-icon">
                                                 <CalIcon size={16} />

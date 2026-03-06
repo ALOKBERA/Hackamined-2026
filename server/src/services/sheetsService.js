@@ -135,7 +135,10 @@ async function appendToSheet(user, tabName, values) {
 
     const updatedRange = appendRes.data.updates?.updatedRange || '';
     const rowMatch = updatedRange.match(/:([A-Z]+)(\d+)$/);
-    return rowMatch ? parseInt(rowMatch[2]) : null;
+    return {
+        rowNumber: rowMatch ? parseInt(rowMatch[2]) : null,
+        spreadsheetId
+    };
 }
 
 /**

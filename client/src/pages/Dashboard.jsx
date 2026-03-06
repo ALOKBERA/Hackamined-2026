@@ -184,6 +184,11 @@ const Dashboard = () => {
                                         <a href={item.driveViewLink} target="_blank" rel="noreferrer" className="btn-icon" title="View Drive">
                                             <ExternalLink size={16} />
                                         </a>
+                                        {item.sheetsLink && (
+                                            <a href={item.sheetsLink} target="_blank" rel="noreferrer" className="btn-icon" title="View entry in Sheet">
+                                                <FileText size={16} />
+                                            </a>
+                                        )}
                                         {item.calendarEventLink && (
                                             <a href={item.calendarEventLink} target="_blank" rel="noreferrer" className="btn-icon" title="Calendar">
                                                 <CalIcon size={16} />
