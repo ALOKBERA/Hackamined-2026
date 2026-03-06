@@ -1,18 +1,10 @@
-const { google } = require('googleapis');
+const { getAuthenticatedClient } = require('../utils/googleAuth');
 
 /**
  * Creates an authenticated Google Calendar client for a user
  */
-function getCalendarClient(user) {
-    const auth = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_CALLBACK_URL
-    );
-    auth.setCredentials({
-        access_token: user.accessToken,
-        refresh_token: user.refreshToken,
-    });
+async function getCalendarClient(user) {
+    const auth = await getAuthenticatedClient(user);
     return google.calendar({ version: 'v3', auth });
 }
 
@@ -34,7 +26,7 @@ function shouldCreateCalendarEvent(category, suggestedAction) {
  * @returns {{ eventId, eventLink }}
  */
 async function createCalendarEvent(user, eventData) {
-    const calendar = getCalendarClient(user);
+    const calendar = await getCalendarClient(user);
 
     // Parse the date, default to 1 week from now if invalid
     let startDateTime;

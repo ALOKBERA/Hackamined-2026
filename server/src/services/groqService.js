@@ -27,8 +27,18 @@ Return a JSON object ONLY (no markdown, no extra text) with this exact structure
   "summary": "<one sentence describing the screenshot content>",
   "date": "<ISO 8601 datetime string if a specific date/time is visible, else null>",
   "suggestedAction": "<'calendar' if it should be added to calendar, 'contact' if it should be saved as contact, 'none' otherwise>",
-  "confidence": <number between 0 and 1>
+  "confidence": <number between 0 and 1>,
+  "extractedData": {
+    "quote": { "text": "<the quote text>", "author": "<author name or null>" },
+    "contact": { "name": "<person name>", "phone": "<phone number>", "email": "<email address>", "org": "<organization or null>" }
+  }
 }
+
+Rules for extractedData:
+- If category is 'Quote', populate 'quote', leave 'contact' null.
+- If category is 'Contact', populate 'contact', leave 'quote' null.
+- Otherwise, both 'quote' and 'contact' should be null.
+- Always return the full JSON structure even if fields are null.
 
 Rules:
 - Ticket: flight/train/bus/event/concert/sports tickets with booking info
@@ -95,6 +105,7 @@ async function classifyScreenshot(imageBuffer, mimeType = 'image/png') {
             date: parsed.date || null,
             suggestedAction: parsed.suggestedAction || 'none',
             confidence: parseFloat(parsed.confidence) || 0.5,
+            extractedData: parsed.extractedData || { quote: null, contact: null },
             rawAI: rawText,
         };
     } catch (parseError) {

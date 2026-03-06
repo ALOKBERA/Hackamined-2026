@@ -4,7 +4,7 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const { classifyScreenshot } = require('../services/groqService');
 const { uploadFileToDrive, deleteFileFromDrive } = require('../services/driveService');
-const { appendRow } = require('../services/sheetsService');
+const { appendRow, appendToSheet } = require('../services/sheetsService');
 const {
     createCalendarEvent,
     shouldCreateCalendarEvent,
@@ -93,6 +93,29 @@ router.post(
                     confidence: aiResult.confidence,
                 });
                 console.log(`✅ Sheet row: ${sheetsRowNumber}`);
+
+                // ── Step 4.1: Specialized Category Logging ───────────────────────────
+                if (aiResult.category === 'Quote' && aiResult.extractedData?.quote) {
+                    const qData = aiResult.extractedData.quote;
+                    await appendToSheet(user, 'Quotes', [
+                        new Date().toLocaleDateString(),
+                        qData.text || '',
+                        qData.author || 'Unknown',
+                        driveResult.webViewLink
+                    ]);
+                    console.log('✅ Specialized Log: Quote added to tab');
+                } else if (aiResult.category === 'Contact' && aiResult.extractedData?.contact) {
+                    const cData = aiResult.extractedData.contact;
+                    await appendToSheet(user, 'Contacts', [
+                        new Date().toLocaleDateString(),
+                        cData.name || 'Unknown',
+                        cData.phone || '',
+                        cData.email || '',
+                        cData.org || '',
+                        driveResult.webViewLink
+                    ]);
+                    console.log('✅ Specialized Log: Contact added to tab');
+                }
             } catch (sheetErr) {
                 console.error('⚠️  Sheets log failed (non-critical):', sheetErr.message);
             }

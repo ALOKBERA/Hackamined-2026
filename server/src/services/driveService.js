@@ -1,5 +1,6 @@
 const { google } = require('googleapis');
 const User = require('../models/User');
+const { getAuthenticatedClient } = require('../utils/googleAuth');
 
 const CATEGORY_FOLDER_NAMES = [
     'Ticket',
@@ -20,16 +21,8 @@ const CATEGORY_FOLDER_NAMES = [
 /**
  * Creates an authenticated Google Drive client for a user
  */
-function getDriveClient(user) {
-    const auth = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_CALLBACK_URL
-    );
-    auth.setCredentials({
-        access_token: user.accessToken,
-        refresh_token: user.refreshToken,
-    });
+async function getDriveClient(user) {
+    const auth = await getAuthenticatedClient(user);
     return google.drive({ version: 'v3', auth });
 }
 
@@ -59,7 +52,7 @@ async function createFolder(drive, name, parentId = null) {
  *   ├── ... (all categories)
  */
 async function ensureUserFolders(user) {
-    const drive = getDriveClient(user);
+    const drive = await getDriveClient(user);
 
     // Create root folder if not exists
     if (!user.driveRootFolderId) {
@@ -99,7 +92,7 @@ async function ensureUserFolders(user) {
 async function uploadFileToDrive(user, buffer, filename, mimeType, category) {
     // Ensure folders exist
     const updatedUser = await ensureUserFolders(user);
-    const drive = getDriveClient(updatedUser);
+    const drive = await getDriveClient(updatedUser);
 
     const categoryFolderId = updatedUser.driveCategoryFolders.get(category);
 
@@ -141,7 +134,7 @@ async function uploadFileToDrive(user, buffer, filename, mimeType, category) {
  */
 async function deleteFileFromDrive(user, fileId) {
     if (!fileId) return; // nothing to delete
-    const drive = getDriveClient(user);
+    const drive = await getDriveClient(user);
     await drive.files.delete({ fileId });
     console.log(`🗑️  Deleted Drive file: ${fileId}`);
 }
