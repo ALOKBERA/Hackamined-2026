@@ -14,7 +14,8 @@ import {
     Palette,
     Shield,
     Image as ImageLucide,
-    Quote as QuoteIcon
+    Quote as QuoteIcon,
+    Instagram
 } from 'lucide-react';
 
 export const getCategoryIcon = (category, size = 24) => {
