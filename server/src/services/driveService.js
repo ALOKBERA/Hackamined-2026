@@ -134,4 +134,17 @@ async function uploadFileToDrive(user, buffer, filename, mimeType, category) {
     };
 }
 
-module.exports = { ensureUserFolders, uploadFileToDrive };
+/**
+ * Deletes a file from Google Drive permanently.
+ * @param {Object} user - User model instance
+ * @param {string} fileId - The Drive file ID to delete
+ */
+async function deleteFileFromDrive(user, fileId) {
+    if (!fileId) return; // nothing to delete
+    const drive = getDriveClient(user);
+    await drive.files.delete({ fileId });
+    console.log(`🗑️  Deleted Drive file: ${fileId}`);
+}
+
+module.exports = { ensureUserFolders, uploadFileToDrive, deleteFileFromDrive };
+

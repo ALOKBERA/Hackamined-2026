@@ -3,7 +3,7 @@ const multer = require('multer');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const { classifyScreenshot } = require('../services/groqService');
-const { uploadFileToDrive } = require('../services/driveService');
+const { uploadFileToDrive, deleteFileFromDrive } = require('../services/driveService');
 const { appendRow } = require('../services/sheetsService');
 const {
     createCalendarEvent,
@@ -211,14 +211,34 @@ router.get('/stats', requireAuth, async (req, res) => {
 // ─── DELETE /api/screenshots/:id ─────────────────────────────────────────────
 router.delete('/:id', requireAuth, async (req, res) => {
     try {
-        const screenshot = await Screenshot.findOneAndDelete({
+        // Find first (don't delete yet) so we have the driveFileId
+        const screenshot = await Screenshot.findOne({
             _id: req.params.id,
             userId: req.user._id,
         });
         if (!screenshot) {
             return res.status(404).json({ success: false, message: 'Not found' });
         }
-        res.json({ success: true, message: 'Screenshot deleted' });
+
+        // ── Step 1: Delete from Google Drive ───────────────────────────────────
+        if (screenshot.driveFileId) {
+            try {
+                const user = await User.findById(req.user._id);
+                await deleteFileFromDrive(user, screenshot.driveFileId);
+                console.log(`🗑️  Drive file deleted: ${screenshot.driveFileId}`);
+            } catch (driveErr) {
+                // Non-fatal — log but continue deleting from DB
+                console.error('⚠️  Drive delete failed (non-critical):', driveErr.message);
+            }
+        }
+
+        // ── Step 2: Delete from MongoDB ────────────────────────────────────────
+        await Screenshot.findByIdAndDelete(screenshot._id);
+
+        res.json({
+            success: true,
+            message: 'Screenshot deleted from dashboard and Google Drive',
+        });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
