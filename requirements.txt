@@ -1,0 +1,94 @@
+# ============================================================
+# SnapSense AI — Requirements
+# ============================================================
+# MERN Stack: MongoDB + Express + React + Node.js
+# ============================================================
+
+
+# ─── SYSTEM REQUIREMENTS ─────────────────────────────────────
+Node.js        >= 18.x         https://nodejs.org
+npm            >= 9.x          (comes with Node.js)
+MongoDB        >= 7.x          https://www.mongodb.com/try/download/community
+Git            any             https://git-scm.com
+
+
+# ─── API KEYS REQUIRED ───────────────────────────────────────
+# All go into server/.env
+
+1. GROQ API KEY
+   Get it from: https://console.groq.com
+   Used for: AI image classification (llama-4-scout vision model)
+
+2. GOOGLE OAUTH CREDENTIALS (Client ID + Secret)
+   Get it from: https://console.cloud.google.com
+   Steps:
+     - Create project → Enable APIs:
+         * Google Drive API
+         * Google Sheets API
+         * Google Calendar API
+     - OAuth 2.0 consent screen → External → add test users
+     - Create Credentials → OAuth 2.0 Client ID → Web Application
+     - Authorized redirect URI: http://localhost:5000/auth/google/callback
+
+3. MONGODB URI
+   Local:  mongodb://localhost:27017/snapsense   (requires MongoDB installed)
+   Atlas:  mongodb+srv://<user>:<pass>@cluster.mongodb.net/snapsense
+           Get it from: https://cloud.mongodb.com (free tier available)
+
+
+# ─── SERVER npm PACKAGES (server/package.json) ───────────────
+express                  ^4.21.2     Web framework
+mongoose                 ^8.9.5      MongoDB ODM
+passport                 ^0.7.0      Authentication middleware
+passport-google-oauth20  ^2.0.0      Google OAuth 2.0 strategy
+express-session          ^1.18.1     Session management
+connect-mongo            ^5.1.0      MongoDB session store
+googleapis               ^144.0.0    Google Drive / Sheets / Calendar
+groq-sdk                 ^0.12.0     Groq AI Vision API
+multer                   ^1.4.5      File upload handling
+cors                     ^2.8.5      Cross-Origin Resource Sharing
+dotenv                   ^16.4.7     Environment variable loader
+jsonwebtoken             ^9.0.2      JWT utilities
+cookie-parser            ^1.4.7      Cookie parsing middleware
+nodemon                  ^3.1.9      [DEV] Auto-restart server
+
+
+# ─── CLIENT npm PACKAGES (client/package.json) ───────────────
+react                    ^19.x       UI framework
+react-dom                ^19.x       React DOM renderer
+react-router-dom         ^7.x        Client-side routing
+axios                    ^1.x        HTTP client
+react-dropzone           ^14.x       Drag-and-drop file upload
+framer-motion            ^12.x       Animations
+react-hot-toast          ^2.x        Toast notifications
+lucide-react             ^0.x        Icon library
+vite                     ^7.x        Build tool & dev server
+@vitejs/plugin-react     ^4.x        Vite React plugin
+
+
+# ─── ENVIRONMENT VARIABLES (server/.env) ─────────────────────
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=<your_mongodb_uri>
+GOOGLE_CLIENT_ID=<your_google_client_id>
+GOOGLE_CLIENT_SECRET=<your_google_client_secret>
+GOOGLE_CALLBACK_URL=http://localhost:5000/auth/google/callback
+SESSION_SECRET=<any_long_random_string>
+GROQ_API_KEY=<your_groq_api_key>
+CLIENT_URL=http://localhost:5173
+
+
+# ─── HOW TO INSTALL ALL NPM PACKAGES ─────────────────────────
+cd server && npm install
+cd ../client && npm install
+
+
+# ─── HOW TO RUN ──────────────────────────────────────────────
+# Terminal 1 (start MongoDB if not running as service):
+Start-Process "C:\Program Files\MongoDB\Server\8.2\bin\mongod.exe" -ArgumentList "--dbpath C:\data\db"
+
+# Terminal 2 (backend):
+cd server && npm run dev      # runs on http://localhost:5000
+
+# Terminal 3 (frontend):
+cd client && npm run dev      # runs on http://localhost:5173
