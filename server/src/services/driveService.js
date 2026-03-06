@@ -97,34 +97,45 @@ async function uploadFileToDrive(user, buffer, filename, mimeType, category) {
     const categoryFolderId = updatedUser.driveCategoryFolders.get(category);
 
     const { Readable } = require('stream');
-    const stream = Readable.from(buffer);
 
-    const res = await drive.files.create({
-        requestBody: {
-            name: filename,
-            parents: [categoryFolderId],
-        },
-        media: {
-            mimeType,
-            body: stream,
-        },
-        fields: 'id, webViewLink, thumbnailLink',
-    });
+    try {
+        const res = await drive.files.create({
+            requestBody: {
+                name: filename,
+                parents: [categoryFolderId],
+            },
+            media: {
+                mimeType,
+                body: Readable.from(buffer),
+            },
+            fields: 'id, webViewLink, thumbnailLink',
+        });
 
-    // Make the file viewable by anyone with the link
-    await drive.permissions.create({
-        fileId: res.data.id,
-        requestBody: {
-            role: 'reader',
-            type: 'anyone',
-        },
-    });
+        // Make the file viewable by anyone with the link
+        await drive.permissions.create({
+            fileId: res.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone',
+            },
+        });
 
-    return {
-        fileId: res.data.id,
-        webViewLink: res.data.webViewLink,
-        thumbnailLink: `https://docs.google.com/uc?export=view&id=${res.data.id}`,
-    };
+        return {
+            fileId: res.data.id,
+            webViewLink: res.data.webViewLink,
+            thumbnailLink: `https://docs.google.com/uc?export=view&id=${res.data.id}`,
+        };
+    } catch (err) {
+        if (err.code === 401 || err.message.includes('Invalid Credentials')) {
+            console.error(`❌ Drive Auth Error for ${user.email}:`, err.message);
+            if (!user.refreshToken) {
+                console.error('⚠️  Reason: No Refresh Token found. User must re-login.');
+            } else {
+                console.error('⚠️  Reason: Refresh token might be revoked or project is in "Testing" mode and token expired.');
+            }
+        }
+        throw err;
+    }
 }
 
 /**

@@ -159,6 +159,20 @@ router.post(
             });
         } catch (err) {
             console.error('❌ Upload error:', err);
+
+            // Handle Authentication / Token issues specifically
+            if (err.code === 401 || err.status === 401 || err.message?.includes('Invalid Credentials')) {
+                const user = await User.findById(req.user._id); // Re-fetch user to ensure `refreshToken` is available
+                const needsRelogin = !user.refreshToken;
+                return res.status(401).json({
+                    success: false,
+                    message: needsRelogin
+                        ? 'Google session expired. Please logout and login again to refresh permissions.'
+                        : 'Google authentication failed. Please try again or re-login.',
+                    isAuthError: true
+                });
+            }
+
             return res.status(500).json({
                 success: false,
                 message: err.message || 'Internal server error',
