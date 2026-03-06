@@ -100,18 +100,18 @@ router.post(
                 const uploadDate = new Date().toLocaleDateString();
 
                 const loggingMap = {
-                    'Quote': { tab: 'Quotes', data: [uploadDate, extractedData?.quote?.text, extractedData?.quote?.author, driveLink] },
-                    'Contact': { tab: 'Contacts', data: [uploadDate, extractedData?.contact?.name, extractedData?.contact?.phone, extractedData?.contact?.email, extractedData?.contact?.org, driveLink] },
-                    'Ticket': { tab: 'Tickets', data: [uploadDate, extractedData?.ticket?.type, extractedData?.ticket?.origin, extractedData?.ticket?.destination, extractedData?.ticket?.date, extractedData?.ticket?.bookingId, driveLink] },
-                    'Payment': { tab: 'Payments', data: [uploadDate, extractedData?.payment?.amount, extractedData?.payment?.currency, extractedData?.payment?.merchant, extractedData?.payment?.date, extractedData?.payment?.transactionId, driveLink] },
-                    'LinkedIn Profile': { tab: 'LinkedIn Profiles', data: [uploadDate, extractedData?.linkedinProfile?.name, extractedData?.linkedinProfile?.headline, extractedData?.linkedinProfile?.company, extractedData?.linkedinProfile?.location, driveLink] },
-                    'LinkedIn Post': { tab: 'LinkedIn Posts', data: [uploadDate, extractedData?.linkedinPost?.author, extractedData?.linkedinPost?.content, extractedData?.linkedinPost?.date, driveLink] },
-                    'Social Media Post': { tab: 'Social Media', data: [uploadDate, extractedData?.social?.platform, extractedData?.social?.author, extractedData?.social?.content, driveLink] },
-                    'Study Notes': { tab: 'Study Notes', data: [uploadDate, extractedData?.study?.subject, extractedData?.study?.topic, extractedData?.study?.summary, driveLink] },
+                    'Quote': { tab: 'Quotes', data: [uploadDate, extractedData?.quote?.text || '', extractedData?.quote?.author || 'Unknown', driveLink] },
+                    'Contact': { tab: 'Contacts', data: [uploadDate, extractedData?.contact?.name || 'Unknown', extractedData?.contact?.phone || '', extractedData?.contact?.email || '', extractedData?.contact?.org || '', driveLink] },
+                    'Ticket': { tab: 'Tickets', data: [uploadDate, extractedData?.ticket?.type || '', extractedData?.ticket?.origin || '', extractedData?.ticket?.destination || '', extractedData?.ticket?.date || '', extractedData?.ticket?.bookingId || '', driveLink] },
+                    'Payment': { tab: 'Payments', data: [uploadDate, extractedData?.payment?.amount || '', extractedData?.payment?.currency || '', extractedData?.payment?.merchant || '', extractedData?.payment?.date || '', extractedData?.payment?.transactionId || '', driveLink] },
+                    'LinkedIn Profile': { tab: 'LinkedIn Profiles', data: [uploadDate, extractedData?.linkedinProfile?.name || '', extractedData?.linkedinProfile?.headline || '', extractedData?.linkedinProfile?.company || '', extractedData?.linkedinProfile?.location || '', driveLink] },
+                    'LinkedIn Post': { tab: 'LinkedIn Posts', data: [uploadDate, extractedData?.linkedinPost?.author || '', extractedData?.linkedinPost?.content || '', extractedData?.linkedinPost?.date || '', driveLink] },
+                    'Social Media Post': { tab: 'Social Media', data: [uploadDate, extractedData?.social?.platform || '', extractedData?.social?.author || '', extractedData?.social?.content || '', driveLink] },
+                    'Study Notes': { tab: 'Study Notes', data: [uploadDate, extractedData?.study?.subject || '', extractedData?.study?.topic || '', extractedData?.study?.summary || '', driveLink] },
                 };
 
                 const logConfig = loggingMap[category];
-                if (logConfig && logConfig.data.every(val => val !== undefined)) {
+                if (logConfig) {
                     await appendToSheet(user, logConfig.tab, logConfig.data);
                     console.log(`✅ Specialized Log: Added to ${logConfig.tab} tab`);
                 }
