@@ -28,9 +28,13 @@ app.use(cookieParser());
 // Basic health check (responds even before DB connects)
 app.get('/health', (req, res) => {
   const dbState = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const uri = process.env.MONGODB_URI || '';
+  const isAtlas = uri.includes('mongodb.net');
   res.json({
     status: 'ok',
     mongo: dbState[mongoose.connection.readyState] || 'unknown',
+    db_type: isAtlas ? '☁️ MongoDB Atlas' : '🖥️ Local MongoDB',
+    host: mongoose.connection.host || 'not connected',
     time: new Date().toISOString(),
   });
 });

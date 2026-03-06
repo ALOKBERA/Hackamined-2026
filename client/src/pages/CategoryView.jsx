@@ -1,143 +1,135 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import axios from 'axios'
-import toast from 'react-hot-toast'
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    ArrowLeft,
+    Trash2,
+    ExternalLink,
+    Calendar as CalIcon,
+    ChevronLeft,
+    FolderOpen
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
-const CATEGORY_META = {
-    'Ticket': { icon: '🎫', color: '#f59e0b' },
-    'Wallpaper': { icon: '🖼️', color: '#3b82f6' },
-    'LinkedIn Profile': { icon: '💼', color: '#0077b5' },
-    'LinkedIn Post': { icon: '📄', color: '#0077b5' },
-    'Social Media Post': { icon: '📱', color: '#e1306c' },
-    'Payment': { icon: '💳', color: '#10b981' },
-    'Sensitive Document': { icon: '🔒', color: '#ef4444' },
-    'Contact': { icon: '👤', color: '#8b5cf6' },
-    'Mail': { icon: '📧', color: '#f97316' },
-    'Quote': { icon: '💬', color: '#ec4899' },
-    'WhatsApp Chat': { icon: '📲', color: '#25d366' },
-    'Study Notes': { icon: '📚', color: '#06b6d4' },
-    'Other': { icon: '🗂️', color: '#6b7280' },
-}
+const CategoryView = () => {
+    const { categoryName } = useParams();
+    const [screenshots, setScreenshots] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-export default function CategoryView() {
-    const { categoryName } = useParams()
-    const category = decodeURIComponent(categoryName)
-    const meta = CATEGORY_META[category] || CATEGORY_META['Other']
-    const [screenshots, setScreenshots] = useState([])
-    const [loading, setLoading] = useState(true)
+    const fetchScreenshots = async () => {
+        try {
+            const res = await axios.get(`/api/screenshots/category/${categoryName}`);
+            setScreenshots(res.data.data);
+        } catch (err) {
+            console.error('Fetch category error:', err);
+            toast.error('Failed to load screenshots');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetch = async () => {
-            try {
-                const res = await axios.get(`/api/screenshots/category/${encodeURIComponent(category)}`)
-                setScreenshots(res.data.data || [])
-            } catch {
-                toast.error('Failed to load screenshots')
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetch()
-    }, [category])
+        fetchScreenshots();
+    }, [categoryName]);
 
     const handleDelete = async (id) => {
-        if (!confirm('Delete this screenshot?')) return
+        if (!window.confirm('Delete this record permanently? This will also remove the file from cloud storage.')) return;
+
         try {
-            await axios.delete(`/api/screenshots/${id}`)
-            setScreenshots((prev) => prev.filter((s) => s._id !== id))
-            toast.success('Deleted')
-        } catch {
-            toast.error('Failed to delete')
+            await axios.delete(`/api/screenshots/${id}`);
+            setScreenshots(prev => prev.filter(s => s._id !== id));
+            toast.success('Indexed item purged');
+        } catch (err) {
+            toast.error('Purge failed');
         }
+    };
+
+    if (loading) {
+        return (
+            <div className="loading-screen">
+                <div className="loading-spinner"></div>
+            </div>
+        );
     }
 
     return (
-        <div className="category-view">
-            <div className="category-view-header">
-                <Link to="/dashboard" className="back-link">← Back</Link>
-                <div className="category-view-title">
-                    <span className="category-big-icon">{meta.icon}</span>
+        <div className="dashboard-main">
+            <header style={{ marginBottom: '48px' }}>
+                <Link to="/dashboard" className="btn-ghost" style={{ marginLeft: '-16px', marginBottom: '24px' }}>
+                    <ChevronLeft size={18} />
+                    Terminal Root
+                </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{
+                        width: '64px', height: '64px',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-md)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        <FolderOpen size={32} style={{ color: 'var(--accent)' }} />
+                    </div>
                     <div>
-                        <h1 style={{ color: meta.color }}>{category}</h1>
-                        <p>{screenshots.length} screenshots</p>
+                        <h1 style={{ fontSize: '2.5rem' }}>{categoryName}</h1>
+                        <p style={{ color: 'var(--text-muted)' }}>{screenshots.length} indexed items found in this segment.</p>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            {loading && (
-                <div className="loading-screen">
-                    <div className="loading-spinner" />
-                </div>
-            )}
-
-            {!loading && screenshots.length === 0 && (
-                <div className="empty-state">
-                    <div className="empty-state-icon">{meta.icon}</div>
-                    <h3>No {category} screenshots yet</h3>
-                    <p>Upload a screenshot and it'll appear here when classified as {category}.</p>
-                    <Link to="/dashboard" className="btn-primary">Go to Dashboard</Link>
-                </div>
-            )}
-
-            <div className="gallery-grid">
+            <div className="premium-grid">
                 <AnimatePresence>
-                    {screenshots.map((sc, i) => (
+                    {screenshots.map((item, i) => (
                         <motion.div
-                            key={sc._id}
-                            className="gallery-card"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ delay: i * 0.04 }}
+                            key={item._id}
+                            className="snap-card"
                             layout
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ delay: i * 0.05 }}
                         >
-                            <div className="gallery-card-img">
-                                {sc.driveThumbnailLink ? (
-                                    <img src={sc.driveThumbnailLink} alt={sc.originalName} />
-                                ) : (
-                                    <div className="gallery-placeholder">{meta.icon}</div>
-                                )}
+                            <div className="snap-img-box">
+                                <img src={item.driveThumbnailLink} alt={item.originalName} className="snap-img" />
                                 <button
-                                    className="gallery-delete-btn"
-                                    onClick={() => handleDelete(sc._id)}
-                                    title="Delete"
+                                    className="btn-icon"
+                                    onClick={() => handleDelete(item._id)}
+                                    style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#ff4d4d' }}
                                 >
-                                    🗑️
+                                    <Trash2 size={16} />
                                 </button>
                             </div>
-                            <div className="gallery-card-body">
-                                <p className="gallery-summary">{sc.metadata?.summary}</p>
-                                <div className="gallery-meta">
-                                    {sc.metadata?.date && (
-                                        <span className="gallery-date">
-                                            📅 {new Date(sc.metadata.date).toLocaleDateString()}
-                                        </span>
-                                    )}
-                                    <span className="gallery-confidence">
-                                        {Math.round((sc.metadata?.confidence || 0) * 100)}% confident
+                            <div className="snap-content">
+                                <h3 className="snap-title" style={{ fontSize: '1rem' }}>{item.metadata?.summary}</h3>
+                                <div className="snap-footer">
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                        {new Date(item.createdAt).toLocaleDateString()}
                                     </span>
-                                </div>
-                                <div className="gallery-links">
-                                    {sc.driveViewLink && (
-                                        <a href={sc.driveViewLink} target="_blank" rel="noreferrer" className="action-link">
-                                            📁 View in Drive
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <a href={item.driveViewLink} target="_blank" rel="noreferrer" className="btn-icon">
+                                            <ExternalLink size={16} />
                                         </a>
-                                    )}
-                                    {sc.calendarEventLink && (
-                                        <a href={sc.calendarEventLink} target="_blank" rel="noreferrer" className="action-link calendar">
-                                            📅 Calendar Event
-                                        </a>
-                                    )}
+                                        {item.calendarEventLink && (
+                                            <a href={item.calendarEventLink} target="_blank" rel="noreferrer" className="btn-icon">
+                                                <CalIcon size={16} />
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
-                                <p className="gallery-time">
-                                    {new Date(sc.createdAt).toLocaleString()}
-                                </p>
                             </div>
                         </motion.div>
                     ))}
                 </AnimatePresence>
             </div>
+
+            {screenshots.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '120px 0', border: '1px dashed var(--border)', borderRadius: 'var(--radius-lg)' }}>
+                    <h3 style={{ color: 'var(--text-secondary)' }}>Segment Empty</h3>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>No items have been assigned to this index category.</p>
+                </div>
+            )}
         </div>
-    )
-}
+    );
+};
+
+export default CategoryView;

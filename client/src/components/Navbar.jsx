@@ -1,51 +1,78 @@
-import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { useAuth } from '../context/AuthContext'
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import {
+    LogOut,
+    LayoutDashboard,
+    Sun,
+    Moon,
+    Command,
+    User as UserIcon
+} from 'lucide-react';
 
-export default function Navbar() {
-    const { user, logout } = useAuth()
-    const location = useLocation()
+const Navbar = () => {
+    const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
+    const location = useLocation();
+
+    if (!user) return null;
 
     return (
-        <motion.nav
-            className="navbar"
-            initial={{ y: -60, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.4 }}
-        >
+        <nav className="navbar">
             <Link to="/dashboard" className="navbar-logo">
-                <span className="logo-icon">📸</span>
-                <span className="logo-text">SnapSense <span className="logo-ai">AI</span></span>
+                <Command size={24} className="text-secondary" />
+                <span>SnapSense <span className="gradient-text">AI</span></span>
             </Link>
 
-            <div className="navbar-center">
+            <div className="nav-links">
                 <Link
                     to="/dashboard"
-                    className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+                    className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}
                 >
-                    Dashboard
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <LayoutDashboard size={16} />
+                        <span>Dashboard</span>
+                    </div>
                 </Link>
             </div>
 
-            <div className="navbar-right">
-                {user && (
-                    <div className="user-menu">
-                        <img
-                            src={user.picture}
-                            alt={user.name}
-                            className="user-avatar"
-                            referrerPolicy="no-referrer"
-                        />
-                        <div className="user-info">
-                            <span className="user-name">{user.name}</span>
-                            <span className="user-email">{user.email}</span>
-                        </div>
-                        <button className="btn-logout" onClick={logout}>
-                            Sign out
-                        </button>
-                    </div>
-                )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <button
+                    onClick={toggleTheme}
+                    style={{
+                        color: 'var(--text-secondary)',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)'
+                    }}
+                    title="Toggle Theme"
+                >
+                    {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
+
+                <div style={{ height: '24px', width: '1px', background: 'var(--border)' }}></div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img
+                        src={user.picture}
+                        alt={user.name}
+                        referrerPolicy="no-referrer"
+                        style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--border)' }}
+                    />
+                    <button
+                        onClick={logout}
+                        className="btn-ghost"
+                        title="Sign Out"
+                        style={{ padding: '8px' }}
+                    >
+                        <LogOut size={18} />
+                    </button>
+                </div>
             </div>
-        </motion.nav>
-    )
-}
+        </nav>
+    );
+};
+
+export default Navbar;

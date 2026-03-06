@@ -1,174 +1,182 @@
-import { useState, useCallback } from 'react'
-import { useDropzone } from 'react-dropzone'
-import { motion, AnimatePresence } from 'framer-motion'
-import axios from 'axios'
-import toast from 'react-hot-toast'
+import React, { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Upload,
+    Loader2,
+    CheckCircle2,
+    Calendar as CalIcon,
+    ExternalLink,
+    ChevronRight,
+    Sparkles,
+    Zap,
+    Layout
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
-const CATEGORY_META = {
-    'Ticket': { icon: '🎫', color: '#f59e0b' },
-    'Wallpaper': { icon: '🖼️', color: '#3b82f6' },
-    'LinkedIn Profile': { icon: '💼', color: '#0077b5' },
-    'LinkedIn Post': { icon: '📄', color: '#0077b5' },
-    'Social Media Post': { icon: '📱', color: '#e1306c' },
-    'Payment': { icon: '💳', color: '#10b981' },
-    'Sensitive Document': { icon: '🔒', color: '#ef4444' },
-    'Contact': { icon: '👤', color: '#8b5cf6' },
-    'Mail': { icon: '📧', color: '#f97316' },
-    'Quote': { icon: '💬', color: '#ec4899' },
-    'WhatsApp Chat': { icon: '📲', color: '#25d366' },
-    'Study Notes': { icon: '📚', color: '#06b6d4' },
-    'Other': { icon: '🗂️', color: '#6b7280' },
-}
+const UploadZone = ({ onSuccess }) => {
+    const [file, setFile] = useState(null);
+    const [preview, setPreview] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [step, setStep] = useState(0); // 0: Idle, 1: AI, 2: Drive, 3: Done
+    const [result, setResult] = useState(null);
 
-export default function UploadZone({ onSuccess }) {
-    const [uploading, setUploading] = useState(false)
-    const [progress, setProgress] = useState(0)
-    const [result, setResult] = useState(null)
-    const [preview, setPreview] = useState(null)
-
-    const onDrop = useCallback(
-        async (acceptedFiles) => {
-            const file = acceptedFiles[0]
-            if (!file) return
-
-            // Preview
-            const reader = new FileReader()
-            reader.onload = (e) => setPreview(e.target.result)
-            reader.readAsDataURL(file)
-
-            setUploading(true)
-            setResult(null)
-            setProgress(10)
-
-            const formData = new FormData()
-            formData.append('screenshot', file)
-
-            try {
-                setProgress(30)
-                const res = await axios.post('/api/screenshots/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                    onUploadProgress: (e) => {
-                        const pct = Math.round((e.loaded * 50) / e.total)
-                        setProgress(30 + pct)
-                    },
-                })
-                setProgress(100)
-                setResult(res.data.screenshot)
-                onSuccess?.(res.data)
-            } catch (err) {
-                toast.error(err.response?.data?.message || 'Upload failed')
-                setPreview(null)
-            } finally {
-                setUploading(false)
-                setTimeout(() => setProgress(0), 1000)
-            }
-        },
-        [onSuccess]
-    )
+    const onDrop = useCallback((acceptedFiles) => {
+        const selectedFile = acceptedFiles[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+            setPreview(URL.createObjectURL(selectedFile));
+            setResult(null);
+            setStep(0);
+        }
+    }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.gif'] },
-        maxSize: 20 * 1024 * 1024,
+        accept: { 'image/*': [] },
         multiple: false,
-        disabled: uploading,
-    })
+        disabled: isUploading
+    });
 
-    const reset = () => {
-        setResult(null)
-        setPreview(null)
-        setProgress(0)
-    }
+    const steps = [
+        { icon: <Zap size={18} />, label: "Classifying with Llama AI" },
+        { icon: <Layout size={18} />, label: "Structuring for Cloud" },
+        { icon: <CheckCircle2 size={18} />, label: "Finalizing Index" }
+    ];
 
-    const catMeta = result ? CATEGORY_META[result.category] || CATEGORY_META['Other'] : null
+    const handleUpload = async () => {
+        if (!file) return;
+        setIsUploading(true);
+        setStep(0);
+
+        const formData = new FormData();
+        formData.append('screenshot', file);
+
+        try {
+            const stepInterval = setInterval(() => {
+                setStep(prev => (prev < 2 ? prev + 1 : prev));
+            }, 2000);
+
+            const response = await axios.post('/api/screenshots/upload', formData);
+
+            clearInterval(stepInterval);
+            setStep(2);
+            setTimeout(() => {
+                setResult(response.data.screenshot);
+                toast.success('Snapshot processed');
+                if (onSuccess) onSuccess();
+            }, 1000);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Processing failed');
+            setIsUploading(false);
+            setStep(0);
+        }
+    };
 
     return (
-        <div className="upload-section">
+        <div className="premium-upload-wrap">
             <AnimatePresence mode="wait">
                 {!result ? (
                     <motion.div
-                        key="dropzone"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        {...getRootProps()}
+                        className={`premium-dropzone ${isDragActive ? 'active' : ''}`}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
                     >
-                        <div
-                            {...getRootProps()}
-                            className={`dropzone ${isDragActive ? 'drag-active' : ''} ${uploading ? 'uploading' : ''}`}
-                            id="upload-dropzone"
-                        >
-                            <input {...getInputProps()} id="screenshot-file-input" />
-                            {preview && !uploading && (
-                                <img src={preview} alt="preview" className="drop-preview" />
-                            )}
-                            {!preview && (
-                                <>
-                                    <div className="drop-icon">
-                                        {isDragActive ? '⬇️' : '📤'}
-                                    </div>
-                                    <p className="drop-title">
-                                        {isDragActive ? 'Drop it!' : 'Drop a screenshot here'}
-                                    </p>
-                                    <p className="drop-sub">or click to browse · PNG, JPG, WEBP up to 20MB</p>
-                                </>
-                            )}
-                            {uploading && (
-                                <div className="upload-progress-wrap">
-                                    <div className="upload-steps">
-                                        <div className={`step ${progress >= 10 ? 'done' : ''}`}>📤 Uploading</div>
-                                        <div className={`step ${progress >= 30 ? 'done' : ''}`}>🤖 AI Classifying</div>
-                                        <div className={`step ${progress >= 70 ? 'done' : ''}`}>☁️ Saving to Drive</div>
-                                        <div className={`step ${progress >= 90 ? 'done' : ''}`}>📊 Logging to Sheets</div>
-                                    </div>
-                                    <div className="progress-bar">
-                                        <motion.div
-                                            className="progress-fill"
-                                            animate={{ width: `${progress}%` }}
-                                            transition={{ duration: 0.4 }}
-                                        />
-                                    </div>
+                        <input {...getInputProps()} />
+
+                        {preview && (
+                            <div style={{ position: 'relative', marginBottom: '24px' }}>
+                                <img src={preview} alt="Preview" style={{ maxHeight: '160px', borderRadius: '12px', border: '1px solid var(--border)' }} />
+                                {isUploading && <div className="scanning-line" />}
+                            </div>
+                        )}
+
+                        {!preview && (
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ marginBottom: '20px', color: 'var(--accent)' }}>
+                                    <Sparkles size={40} />
                                 </div>
-                            )}
-                        </div>
+                                <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Push to Cloud</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Drag a screenshot to begin the AI analysis</p>
+                            </div>
+                        )}
+
+                        {isUploading && (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
+                                    <Loader2 className="animate-spin" size={20} />
+                                    <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{steps[step].label}</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {file && !isUploading && (
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                                <button className="btn-premium" onClick={(e) => { e.stopPropagation(); handleUpload(); }}>
+                                    Execute Analysis
+                                    <ChevronRight size={18} />
+                                </button>
+                                <button className="btn-secondary" onClick={(e) => { e.stopPropagation(); setFile(null); setPreview(null); }}>
+                                    Reset
+                                </button>
+                            </div>
+                        )}
                     </motion.div>
                 ) : (
                     <motion.div
-                        key="result"
-                        className="result-card"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        style={{ '--cat-color': catMeta.color }}
+                        className="card-premium"
+                        style={{ background: 'var(--bg-secondary)', textAlign: 'center' }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
                     >
-                        <div className="result-header">
-                            <div className="result-category-badge" style={{ background: catMeta.color + '22', border: `1px solid ${catMeta.color}66`, color: catMeta.color }}>
-                                {catMeta.icon} {result.category}
-                            </div>
-                            <div className="result-confidence">
-                                {Math.round((result.metadata?.confidence || 0) * 100)}% confident
+                        <div style={{ marginBottom: '20px' }}>
+                            <div style={{
+                                display: 'inline-flex',
+                                padding: '8px 16px',
+                                borderRadius: '40px',
+                                background: 'var(--accent-glow)',
+                                color: 'var(--accent)',
+                                fontWeight: 800,
+                                fontSize: '0.85rem',
+                                border: '1px solid var(--accent)'
+                            }}>
+                                {result.category.toUpperCase()}
                             </div>
                         </div>
-                        <p className="result-summary">{result.metadata?.summary}</p>
 
-                        <div className="result-actions">
-                            {result.driveViewLink && (
-                                <a href={result.driveViewLink} target="_blank" rel="noreferrer" className="result-action-btn drive">
-                                    📁 View in Drive
-                                </a>
-                            )}
+                        <h3 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>{result.metadata.summary}</h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
+                            Snapshot classified and archived with {Math.round(result.metadata.confidence * 100)}% accuracy.
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '32px' }}>
+                            <a href={result.driveViewLink} target="_blank" rel="noreferrer" className="btn-secondary">
+                                <ExternalLink size={18} />
+                                Root Folder
+                            </a>
                             {result.calendarEventLink && (
-                                <a href={result.calendarEventLink} target="_blank" rel="noreferrer" className="result-action-btn calendar">
-                                    📅 Calendar Event Created
+                                <a href={result.calendarEventLink} target="_blank" rel="noreferrer" className="btn-secondary" style={{ color: 'var(--accent)' }}>
+                                    <CalIcon size={18} />
+                                    Calendar Event
                                 </a>
                             )}
                         </div>
 
-                        <button className="btn-upload-another" onClick={reset}>
-                            + Upload Another
+                        <button
+                            className="btn-premium"
+                            style={{ width: '100%', background: 'var(--text-primary)', color: 'var(--bg-primary)' }}
+                            onClick={() => { setResult(null); setFile(null); setPreview(null); }}
+                        >
+                            Process New Visual
                         </button>
                     </motion.div>
                 )}
             </AnimatePresence>
         </div>
-    )
-}
+    );
+};
+
+export default UploadZone;
