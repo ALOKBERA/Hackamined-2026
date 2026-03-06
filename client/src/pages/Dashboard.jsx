@@ -16,6 +16,7 @@ import {
 import UploadZone from '../components/UploadZone';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import SmartImage from '../components/SmartImage';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -136,7 +137,12 @@ const Dashboard = () => {
                             transition={{ delay: i * 0.05 }}
                         >
                             <div className="snap-img-box">
-                                <img src={item.driveThumbnailLink} alt={item.originalName} className="snap-img" />
+                                <SmartImage
+                                    src={item.driveThumbnailLink}
+                                    category={item.category}
+                                    alt={item.originalName}
+                                    className="snap-img"
+                                />
                                 <div className="snap-badge">{item.category}</div>
                             </div>
                             <div className="snap-content">

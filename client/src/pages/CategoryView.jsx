@@ -11,6 +11,7 @@ import {
     FolderOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import SmartImage from '../components/SmartImage';
 
 const CategoryView = () => {
     const { categoryName } = useParams();
@@ -90,7 +91,12 @@ const CategoryView = () => {
                             transition={{ delay: i * 0.05 }}
                         >
                             <div className="snap-img-box">
-                                <img src={item.driveThumbnailLink} alt={item.originalName} className="snap-img" />
+                                <SmartImage
+                                    src={item.driveThumbnailLink}
+                                    category={item.category}
+                                    alt={item.originalName}
+                                    className="snap-img"
+                                />
                                 <button
                                     className="btn-icon"
                                     onClick={() => handleDelete(item._id)}

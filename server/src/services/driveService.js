@@ -130,7 +130,7 @@ async function uploadFileToDrive(user, buffer, filename, mimeType, category) {
     return {
         fileId: res.data.id,
         webViewLink: res.data.webViewLink,
-        thumbnailLink: `https://drive.google.com/thumbnail?id=${res.data.id}&sz=w800`,
+        thumbnailLink: `https://docs.google.com/uc?export=view&id=${res.data.id}`,
     };
 }
 
