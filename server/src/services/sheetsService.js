@@ -21,6 +21,12 @@ const SHEET_HEADERS = [
 
 const QUOTE_HEADERS = ['Date of Upload', 'Quote Text', 'Author', 'Drive Link'];
 const CONTACT_HEADERS = ['Date of Upload', 'Name', 'Phone', 'Email', 'Organization', 'Drive Link'];
+const TICKET_HEADERS = ['Date of Upload', 'Type', 'Origin', 'Destination', 'Date/Time', 'Booking ID', 'Drive Link'];
+const PAYMENT_HEADERS = ['Date of Upload', 'Amount', 'Currency', 'Merchant', 'Date', 'Transaction ID', 'Drive Link'];
+const LINKEDIN_PROFILE_HEADERS = ['Date of Upload', 'Name', 'Headline', 'Company', 'Location', 'Drive Link'];
+const LINKEDIN_POST_HEADERS = ['Date of Upload', 'Author', 'Post Content', 'Date', 'Drive Link'];
+const SOCIAL_HEADERS = ['Date of Upload', 'Platform', 'Author', 'Content', 'Drive Link'];
+const STUDY_HEADERS = ['Date of Upload', 'Subject', 'Topic', 'Summary', 'Drive Link'];
 
 /**
  * Ensures the user has a SnapSense spreadsheet with required headers and tabs.
@@ -48,7 +54,13 @@ async function ensureUserSheet(user) {
     const requiredTabs = [
         { title: 'Screenshots', headers: SHEET_HEADERS },
         { title: 'Quotes', headers: QUOTE_HEADERS },
-        { title: 'Contacts', headers: CONTACT_HEADERS }
+        { title: 'Contacts', headers: CONTACT_HEADERS },
+        { title: 'Tickets', headers: TICKET_HEADERS },
+        { title: 'Payments', headers: PAYMENT_HEADERS },
+        { title: 'LinkedIn Profiles', headers: LINKEDIN_PROFILE_HEADERS },
+        { title: 'LinkedIn Posts', headers: LINKEDIN_POST_HEADERS },
+        { title: 'Social Media', headers: SOCIAL_HEADERS },
+        { title: 'Study Notes', headers: STUDY_HEADERS }
     ];
 
     for (const tab of requiredTabs) {

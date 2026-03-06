@@ -30,15 +30,20 @@ Return a JSON object ONLY (no markdown, no extra text) with this exact structure
   "confidence": <number between 0 and 1>,
   "extractedData": {
     "quote": { "text": "<the quote text>", "author": "<author name or null>" },
-    "contact": { "name": "<person name>", "phone": "<phone number>", "email": "<email address>", "org": "<organization or null>" }
+    "contact": { "name": "<person name>", "phone": "<phone number>", "email": "<email address>", "org": "<organization or null>" },
+    "ticket": { "type": "<flight/train/event/etc>", "origin": "<origin or null>", "destination": "<destination or null>", "date": "<date/time>", "bookingId": "<booking id or null>" },
+    "payment": { "amount": "<amount>", "currency": "<currency>", "merchant": "<merchant name>", "date": "<date>", "transactionId": "<id or null>" },
+    "linkedinProfile": { "name": "<name>", "headline": "<headline/role>", "company": "<current company or null>", "location": "<location or null>" },
+    "linkedinPost": { "author": "<author name>", "content": "<summary of post content>", "date": "<date or null>" },
+    "social": { "platform": "<Instagram/Twitter/etc>", "author": "<author name/handle>", "content": "<summary of content>" },
+    "study": { "subject": "<subject>", "topic": "<topic>", "summary": "<key points summary>" }
   }
 }
 
 Rules for extractedData:
-- If category is 'Quote', populate 'quote', leave 'contact' null.
-- If category is 'Contact', populate 'contact', leave 'quote' null.
-- Otherwise, both 'quote' and 'contact' should be null.
-- Always return the full JSON structure even if fields are null.
+- Populate the specific object matching the 'category', leave ALL others null. (e.g., if category is 'Ticket', populate 'ticket', others null).
+- If no specific object matches the category, all extractedData fields can be null.
+- Always return the full JSON structure with all objects present.
 
 Rules:
 - Ticket: flight/train/bus/event/concert/sports tickets with booking info
@@ -105,7 +110,10 @@ async function classifyScreenshot(imageBuffer, mimeType = 'image/png') {
             date: parsed.date || null,
             suggestedAction: parsed.suggestedAction || 'none',
             confidence: parseFloat(parsed.confidence) || 0.5,
-            extractedData: parsed.extractedData || { quote: null, contact: null },
+            extractedData: parsed.extractedData || {
+                quote: null, contact: null, ticket: null, payment: null,
+                linkedinProfile: null, linkedinPost: null, social: null, study: null
+            },
             rawAI: rawText,
         };
     } catch (parseError) {
