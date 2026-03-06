@@ -28,6 +28,9 @@ const LINKEDIN_PROFILE_HEADERS = ['Date of Upload', 'Name', 'Headline', 'Company
 const LINKEDIN_POST_HEADERS = ['Date of Upload', 'Author', 'Post Content', 'Date', 'Drive Link'];
 const SOCIAL_HEADERS = ['Date of Upload', 'Platform', 'Author', 'Content', 'Drive Link'];
 const STUDY_HEADERS = ['Date of Upload', 'Subject', 'Topic', 'Summary', 'Drive Link'];
+const MAIL_HEADERS = ['Date of Upload', 'Sender', 'Subject', 'Date Received', 'Summary', 'Drive Link'];
+const MESSAGE_HEADERS = ['Date of Upload', 'Sender', 'Platform', 'Preview', 'Drive Link'];
+const DOCUMENT_HEADERS = ['Date of Upload', 'Document Type', 'Name/ID', 'Expiry/Date', 'Drive Link'];
 
 /**
  * Ensures the user has a SnapSense spreadsheet with required headers and tabs.
@@ -61,7 +64,10 @@ async function ensureUserSheet(user) {
         { title: 'LinkedIn Profiles', headers: LINKEDIN_PROFILE_HEADERS },
         { title: 'LinkedIn Posts', headers: LINKEDIN_POST_HEADERS },
         { title: 'Social Media', headers: SOCIAL_HEADERS },
-        { title: 'Study Notes', headers: STUDY_HEADERS }
+        { title: 'Study Notes', headers: STUDY_HEADERS },
+        { title: 'Email Logs', headers: MAIL_HEADERS },
+        { title: 'Message Logs', headers: MESSAGE_HEADERS },
+        { title: 'ID Documents', headers: DOCUMENT_HEADERS }
     ];
 
     for (const tab of requiredTabs) {

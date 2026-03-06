@@ -108,6 +108,9 @@ router.post(
                     'LinkedIn Post': { tab: 'LinkedIn Posts', data: [uploadDate, extractedData?.linkedinPost?.author || '', extractedData?.linkedinPost?.content || '', extractedData?.linkedinPost?.date || '', driveLink] },
                     'Social Media Post': { tab: 'Social Media', data: [uploadDate, extractedData?.social?.platform || '', extractedData?.social?.author || '', extractedData?.social?.content || '', driveLink] },
                     'Study Notes': { tab: 'Study Notes', data: [uploadDate, extractedData?.study?.subject || '', extractedData?.study?.topic || '', extractedData?.study?.summary || '', driveLink] },
+                    'Mail': { tab: 'Email Logs', data: [uploadDate, extractedData?.mail?.sender || '', extractedData?.mail?.subject || '', extractedData?.mail?.date || '', extractedData?.mail?.summary || '', driveLink] },
+                    'WhatsApp Chat': { tab: 'Message Logs', data: [uploadDate, extractedData?.message?.sender || '', extractedData?.message?.platform || 'WhatsApp', extractedData?.message?.text || '', driveLink] },
+                    'Sensitive Document': { tab: 'ID Documents', data: [uploadDate, extractedData?.document?.type || '', `${extractedData?.document?.name || ''} (${extractedData?.document?.idNumber || 'No ID'})`, extractedData?.document?.expiry || '', driveLink] },
                 };
 
                 const logConfig = loggingMap[category];

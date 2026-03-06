@@ -36,7 +36,10 @@ Return a JSON object ONLY (no markdown, no extra text) with this exact structure
     "linkedinProfile": { "name": "<name>", "headline": "<headline/role>", "company": "<current company or null>", "location": "<location or null>" },
     "linkedinPost": { "author": "<author name>", "content": "<summary of post content>", "date": "<date or null>" },
     "social": { "platform": "<Instagram/Twitter/etc>", "author": "<author name/handle>", "content": "<summary of content>" },
-    "study": { "subject": "<subject>", "topic": "<topic>", "summary": "<key points summary>" }
+    "study": { "subject": "<subject>", "topic": "<topic>", "summary": "<key points summary>" },
+    "mail": { "sender": "<sender email/name>", "subject": "<subject>", "date": "<received date>", "summary": "<brief summary>" },
+    "message": { "platform": "<WhatsApp/Messenger/etc>", "sender": "<sender name>", "text": "<message preview>" },
+    "document": { "type": "<ID/Passport/etc>", "idNumber": "<ID number if visible>", "name": "<person name on doc>", "expiry": "<expiry date or null>" }
   }
 }
 
@@ -112,7 +115,8 @@ async function classifyScreenshot(imageBuffer, mimeType = 'image/png') {
             confidence: parseFloat(parsed.confidence) || 0.5,
             extractedData: parsed.extractedData || {
                 quote: null, contact: null, ticket: null, payment: null,
-                linkedinProfile: null, linkedinPost: null, social: null, study: null
+                linkedinProfile: null, linkedinPost: null, social: null, study: null,
+                mail: null, message: null, document: null
             },
             rawAI: rawText,
         };
